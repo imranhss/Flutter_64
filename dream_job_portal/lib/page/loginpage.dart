@@ -1,9 +1,11 @@
+import 'package:code/page/registrationpag.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget{
 
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  bool _obscurePassword= true;
 
 
   @override
@@ -29,12 +31,25 @@ class LoginPage extends StatelessWidget{
 
             TextField(
               controller: password,
+              obscureText: _obscurePassword,
               decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.password)),
-              obscureText: true,
+                  prefixIcon: Icon(Icons.password),
+                  suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility
+                      ),
+                    onPressed: (){
+                        _obscurePassword = !_obscurePassword;
+
+                    },
+
+              ),
+
             ),
+            ),
+
 
             SizedBox(
                 height:  20.0
@@ -65,6 +80,27 @@ class LoginPage extends StatelessWidget{
             )
 
           ),
+
+            SizedBox(
+              height: 20.0,
+            ),
+
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Registration()),
+                );
+              },
+              child: Text(
+                'Registration',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            )
+
 
           ],
         ),
