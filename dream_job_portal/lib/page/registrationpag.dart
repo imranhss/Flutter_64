@@ -1,10 +1,15 @@
+import 'dart:io';
+
+
 import 'package:code/page/loginpage.dart';
 import 'package:date_field/date_field.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:radio_group_v2/radio_group_v2.dart';
 import 'package:radio_group_v2/radio_group_v2.dart' as v2;
-
 
 class Registration extends StatefulWidget {
   const Registration({super.key});
@@ -14,8 +19,7 @@ class Registration extends StatefulWidget {
 }
 
 class _RegistrationState extends State<Registration> {
-
-  bool _obscurePassword= true;
+  bool _obscurePassword = true;
 
   final TextEditingController name = TextEditingController();
   final TextEditingController email = TextEditingController();
@@ -25,7 +29,6 @@ class _RegistrationState extends State<Registration> {
   final TextEditingController cell = TextEditingController();
   final TextEditingController address = TextEditingController();
 
-
   final RadioGroupController genderController = RadioGroupController();
 
   final DateTimeFieldPickerPlatform dob = DateTimeFieldPickerPlatform.material;
@@ -33,6 +36,11 @@ class _RegistrationState extends State<Registration> {
   String? selectedGender;
 
   DateTime? selectedDOB;
+
+  XFile? selectedImage;
+
+  Uint8List? webImage;
+  final ImagePicker _picker = ImagePicker();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -81,18 +89,17 @@ class _RegistrationState extends State<Registration> {
 
                     suffixIcon: IconButton(
                       icon: Icon(
-                           _obscurePassword ? Icons.visibility_off : Icons.visibility
-
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
-                      onPressed: (){
+                      onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
                         });
-
                       },
+                    ),
                   ),
-
-                ),
                 ),
 
                 SizedBox(height: 20),
@@ -147,8 +154,10 @@ class _RegistrationState extends State<Registration> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Gender:",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Gender:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       v2.RadioGroup(
                         controller: genderController,
                         values: const ["Male", "Female", "Other"],
@@ -164,29 +173,59 @@ class _RegistrationState extends State<Registration> {
                   ),
                 ),
 
-                SizedBox(
-                  height: 20.0,
+                SizedBox(height: 20.0),
+
+
+                TextButton.icon(
+                  icon: Icon(Icons.image),
+                  label: Text('Upload Image'),
+                  onPressed: pickImage,
                 ),
+                // Display selected image preview
+                if (kIsWeb && webImage != null)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.memory(
+                      webImage!,
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                else
+                  if (!kIsWeb && selectedImage != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.file(
+                        File(selectedImage!.path),
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+
+                    ),
+
+
+
+                SizedBox(height: 20.0),
 
                 ElevatedButton(
-                    onPressed: () {
-                      //_register();
-                    },
-                    child: Text(
-                      "Registration",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontFamily:GoogleFonts.lato().fontFamily
-                      ),
+                  onPressed: () {
+                    //_register();
+                  },
+                  child: Text(
+                    "Registration",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.lato().fontFamily,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                    )
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
-                SizedBox(
-                  height: 20.0,
-                ),
+                SizedBox(height: 20.0),
 
                 TextButton(
                   onPressed: () {
@@ -202,8 +241,7 @@ class _RegistrationState extends State<Registration> {
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                )
-
+                ),
               ],
             ),
           ),
@@ -211,4 +249,31 @@ class _RegistrationState extends State<Registration> {
       ),
     );
   }
+
+
+
+
+  Future<void> pickImage() async {
+    if (kIsWeb) {
+      // For Web: Use image_picker_web to pick image and store as bytes
+      var pickedImage = await ImagePickerWeb.getImageAsBytes();
+      if (pickedImage != null) {
+        setState(() {
+          webImage = pickedImage; // Store the picked image as Uint8List
+        });
+      }
+    } else {
+      // For Mobile: Use image_picker to pick image
+      final XFile? pickedImage =
+      await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedImage != null) {
+        setState(() {
+          selectedImage = pickedImage;
+        });
+      }
+    }
+  }
+
+
+
 }
