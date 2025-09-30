@@ -2,6 +2,7 @@ import 'dart:io';
 
 
 import 'package:code/page/loginpage.dart';
+import 'package:code/service/authservice.dart';
 import 'package:date_field/date_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -211,7 +212,7 @@ class _RegistrationState extends State<Registration> {
 
                 ElevatedButton(
                   onPressed: () {
-                    //_register();
+                    _register();
                   },
                   child: Text(
                     "Registration",
@@ -273,6 +274,72 @@ class _RegistrationState extends State<Registration> {
       }
     }
   }
+
+
+
+  void _register() async {
+    if (_formKey.currentState!.validate()) {
+      if (password.text != confirmPassword.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Passwords do not match!')),
+        );
+        return;
+      }
+
+      // Check image selection on mobile (File is required)
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image upload not supported on Web yet.')),
+        );
+        return;
+      } else if (selectedImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select an image.')),
+        );
+        return;
+      }
+
+      final user = {
+        "name": name.text,
+        "email": email.text,
+        "phone": cell.text,
+        "password": password.text,
+      };
+
+      final jobSeeker = {
+        "name": name.text,
+        "email": email.text,
+        "phone": cell.text,
+        "gender": selectedGender ?? "Other",
+        "address": address.text,
+        "dateOfBirth": selectedDOB?.toIso8601String() ?? "",
+      };
+
+      final apiService = AuthService();
+
+      bool success = await apiService.registerJobSeeker(
+        user: user,
+        jobSeeker: jobSeeker,
+        photo: File(selectedImage!.path),  // Non-nullable required by your service
+      );
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration Successful')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration Failed')),
+        );
+      }
+    }
+  }
+
+
 
 
 
