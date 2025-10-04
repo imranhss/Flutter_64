@@ -1,3 +1,4 @@
+import 'package:code/jobseeker/job_seeker_profile.dart';
 import 'package:code/page/adminpage.dart';
 import 'package:code/page/registrationpag.dart';
 import 'package:code/service/authservice.dart';
@@ -132,6 +133,12 @@ class LoginPage extends StatelessWidget{
             MaterialPageRoute(builder: (context) => AdminPage()),
           );
         }
+       else if (role == 'JOBSEEKER') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => JobSeekerProfile()),
+          );
+        }
 
         else {
           print('Unknown role: $role');
@@ -145,8 +152,6 @@ class LoginPage extends StatelessWidget{
         print('Login failed: $error');
 
       }
-
-
 
 
   }
