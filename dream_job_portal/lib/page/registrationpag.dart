@@ -1,6 +1,4 @@
 import 'dart:io';
-
-
 import 'package:code/page/loginpage.dart';
 import 'package:code/service/authservice.dart';
 import 'package:date_field/date_field.dart';
@@ -41,6 +39,7 @@ class _RegistrationState extends State<Registration> {
   XFile? selectedImage;
 
   Uint8List? webImage;
+
   final ImagePicker _picker = ImagePicker();
 
   final _formKey = GlobalKey<FormState>();
@@ -162,7 +161,7 @@ class _RegistrationState extends State<Registration> {
                       v2.RadioGroup(
                         controller: genderController,
                         values: const ["Male", "Female", "Other"],
-                        indexOfDefault: 0,
+                        indexOfDefault: 2,
                         orientation: RadioGroupOrientation.horizontal,
                         onChanged: (newValue) {
                           setState(() {
@@ -277,28 +276,115 @@ class _RegistrationState extends State<Registration> {
 
 
 
+  // void _register() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     if (password.text != confirmPassword.text) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Passwords do not match!')),
+  //       );
+  //       return;
+  //     }
+  //
+  //     // Validate image selection
+  //     if (kIsWeb) {
+  //       if (webImage == null) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Please select an image.')),
+  //         );
+  //         return;
+  //       }
+  //     } else {
+  //       if (selectedImage == null) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Please select an image.')),
+  //         );
+  //         return;
+  //       }
+  //     }
+  //
+  //     final user = {
+  //       "name": name.text,
+  //       "email": email.text,
+  //       "phone": cell.text,
+  //       "password": password.text,
+  //     };
+  //
+  //     final jobSeeker = {
+  //       "name": name.text,
+  //       "email": email.text,
+  //       "phone": cell.text,
+  //       "gender": selectedGender ?? "Other",
+  //       "address": address.text,
+  //       "dateOfBirth": selectedDOB?.toIso8601String() ?? "",
+  //     };
+  //
+  //     final apiService = AuthService();
+  //     bool success = false;
+  //
+  //     if (kIsWeb && webImage != null) {
+  //       success = await apiService.registerJobSeekerWeb(
+  //         user: user,
+  //         jobSeeker: jobSeeker,
+  //         photoBytes: webImage!, // safe because checked above
+  //       );
+  //     } else if (selectedImage != null) {
+  //       success = await apiService.registerJobSeekerWeb(
+  //         user: user,
+  //         jobSeeker: jobSeeker,
+  //         photoFile: File(selectedImage!.path), // safe because checked above
+  //       );
+  //     }
+  //
+  //     if (success) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Registration Successful')),
+  //       );
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(builder: (context) => LoginPage()),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Registration Failed')),
+  //       );
+  //     }
+  //   }
+  // }
+
+
+  /// Method to handle Job Seeker registration
   void _register() async {
+    // ✅ Check if the form (text fields) is valid
     if (_formKey.currentState!.validate()) {
+      // ✅ Check if password and confirm password match
       if (password.text != confirmPassword.text) {
+        // Show an error message if passwords don’t match
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Passwords do not match!')),
         );
-        return;
+        return; // stop further execution
       }
 
-      // Check image selection on mobile (File is required)
+      // ✅ Validate that the user has selected an image
       if (kIsWeb) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Image upload not supported on Web yet.')),
-        );
-        return;
-      } else if (selectedImage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please select an image.')),
-        );
-        return;
+        // On Web → check if webImage (Uint8List) is selected
+        if (webImage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please select an image.')),
+          );
+          return; // stop further execution
+        }
+      } else {
+        // On Mobile/Desktop → check if image file is selected
+        if (selectedImage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please select an image.')),
+          );
+          return; // stop further execution
+        }
       }
 
+      // ✅ Prepare User object (basic login info)
       final user = {
         "name": name.text,
         "email": email.text,
@@ -306,40 +392,60 @@ class _RegistrationState extends State<Registration> {
         "password": password.text,
       };
 
+      // ✅ Prepare JobSeeker object (extra personal info)
       final jobSeeker = {
         "name": name.text,
         "email": email.text,
         "phone": cell.text,
         "gender": selectedGender ?? "Other",
+        // fallback if null
         "address": address.text,
         "dateOfBirth": selectedDOB?.toIso8601String() ?? "",
+        // convert DateTime to ISO string
       };
 
+      // ✅ Initialize your API Service
       final apiService = AuthService();
 
-      bool success = await apiService.registerJobSeeker(
-        user: user,
-        jobSeeker: jobSeeker,
-        photo: File(selectedImage!.path),  // Non-nullable required by your service
-      );
+      // ✅ Track API call success or failure
+      bool success = false;
 
+      // ✅ Send registration request (different handling for Web vs Mobile)
+      if (kIsWeb && webImage != null) {
+        // For Web → send photo as bytes
+        success = await apiService.registerJobSeekerWeb(
+          user: user,
+          jobSeeker: jobSeeker,
+          photoBytes: webImage!, // safe to use ! because already checked above
+        );
+      } else if (selectedImage != null) {
+        // For Mobile → send photo as file
+        success = await apiService.registerJobSeekerWeb(
+          user: user,
+          jobSeeker: jobSeeker,
+          photoFile: File(selectedImage!
+              .path), // safe to use ! because already checked above
+        );
+      }
+
+      // ✅ Handle the API response
       if (success) {
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration Successful')),
         );
+
+        // Redirect user to Login Page after successful registration
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginPage()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration Failed')),
-        );
+        // Show error message if regi
+
       }
     }
   }
-
-
 
 
 
