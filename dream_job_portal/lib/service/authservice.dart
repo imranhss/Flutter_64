@@ -124,6 +124,60 @@ class AuthService {
   }
 
 
-  // flutter run -d chrome --web-port=5000
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('authToken');
+  }
+
+
+  Future<bool> isTokenExpired() async {
+    String? token = await getToken();
+    if (token != null) {
+      DateTime expiryDate = Jwt.getExpiryDate(token)!;
+      return DateTime.now().isAfter(expiryDate);
+    }
+    return true;
+  }
+
+
+  Future<bool> isLoggedIn() async {
+    String? token = await getToken();
+    if (token != null && !(await isTokenExpired())) {
+      return true;
+    } else {
+      await logout();
+      return false;
+    }
+  }
+
+
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('authToken');
+    await prefs.remove('userRole');
+  }
+
+
+  Future<bool> hasRole(List<String> roles) async {
+    String? role = await getUserRole();
+    return role != null && roles.contains(role);
+  }
+
+
+  Future<bool> isAdmin() async {
+    return await hasRole(['ADMIN']);
+  }
+
+  Future<bool> isEmployeer() async {
+    return await hasRole(['EMPLOYER']);
+  }
+
+
+  Future<bool> isJobSeeker() async {
+    return await hasRole(['JOBSEEKER']);
+  }
+
+
+
 
 }

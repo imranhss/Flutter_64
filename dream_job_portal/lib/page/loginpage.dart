@@ -2,6 +2,7 @@ import 'package:code/jobseeker/job_seeker_profile.dart';
 import 'package:code/page/adminpage.dart';
 import 'package:code/page/registrationpag.dart';
 import 'package:code/service/authservice.dart';
+import 'package:code/service/job_seeker_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -14,6 +15,7 @@ class LoginPage extends StatelessWidget{
 
   final storage = new FlutterSecureStorage();
   AuthService authService=AuthService();
+  JobSeekerService jobSeekerService= JobSeekerService();
 
 
   @override
@@ -134,17 +136,21 @@ class LoginPage extends StatelessWidget{
           );
         }
        else if (role == 'JOBSEEKER') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => JobSeekerProfile()),
-          );
+          final profile = await jobSeekerService.getJobSeekerProfile();
+
+          if (profile != null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JobSeekerProfile(profile: profile),
+              ),
+            );
+          }
         }
 
         else {
           print('Unknown role: $role');
         }
-
-
 
 
       }
