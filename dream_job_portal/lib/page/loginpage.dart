@@ -14,6 +14,7 @@ class LoginPage extends StatelessWidget{
   bool _obscurePassword= true;
 
   final storage = new FlutterSecureStorage();
+
   AuthService authService=AuthService();
   JobSeekerService jobSeekerService= JobSeekerService();
 
@@ -158,7 +159,6 @@ class LoginPage extends StatelessWidget{
         print('Login failed: $error');
 
       }
-
 
   }
 

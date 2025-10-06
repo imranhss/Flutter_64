@@ -1,10 +1,15 @@
+import 'package:code/jobseeker/my_Applications_Page.dart';
+import 'package:code/jobseeker/summary_page.dart';
+import 'package:code/service/summary_service.dart';
 import 'package:flutter/material.dart';
 import 'package:code/service/authservice.dart';
 import 'package:code/page/loginpage.dart'; // adjust path to your actual LoginPage file
 
 class JobSeekerProfile extends StatelessWidget {
   final Map<String, dynamic> profile;
-  final AuthService _authService = AuthService(); // Create instance of AuthService
+  final AuthService _authService =
+      AuthService(); // Create instance of AuthService
+  final SummaryService summaryService = SummaryService();
 
   JobSeekerProfile({Key? key, required this.profile}) : super(key: key);
 
@@ -19,18 +24,18 @@ class JobSeekerProfile extends StatelessWidget {
     final String? photoName = profile['photo'];
 
     // Build full photo URL only if photo exists
-    final String? photoUrl =
-    (photoName != null && photoName.isNotEmpty) ? "$baseUrl$photoName" : null;
+    final String? photoUrl = (photoName != null && photoName.isNotEmpty)
+        ? "$baseUrl$photoName"
+        : null;
 
     // ----------------------------
     // SCAFFOLD: Main screen layout
     // ----------------------------
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Job Seeker Profile",
-        style: TextStyle(
-          color: Colors.white
-        ),
+        title: const Text(
+          "Job Seeker Profile",
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black12,
         centerTitle: true,
@@ -41,9 +46,7 @@ class JobSeekerProfile extends StatelessWidget {
       // DRAWER: Side navigation menu
       // ----------------------------
       drawer: Drawer(
-
         child: ListView(
-
           padding: EdgeInsets.zero, // Removes extra top padding
           children: [
             // 🟣 Drawer Header with user info
@@ -57,8 +60,8 @@ class JobSeekerProfile extends StatelessWidget {
               currentAccountPicture: CircleAvatar(
                 backgroundImage: (photoUrl != null)
                     ? NetworkImage(photoUrl)
-                    : const AssetImage('assets/default_avatar.jpg')
-                as ImageProvider, // Default if no photo
+                    : const AssetImage('assets/images/default_avatar.jpg')
+                          as ImageProvider, // Default if no photo
               ),
             ),
 
@@ -72,11 +75,20 @@ class JobSeekerProfile extends StatelessWidget {
             ),
 
             ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Profile'),
-              onTap: () {
+              leading: const Icon(Icons.abc),
+              title: const Text('Summary'),
+              onTap: () async {
                 // TODO: Add navigation to Edit Profile Page
-                Navigator.pop(context);
+                final summary = await summaryService.getJobSeekerSummary();
+
+                if (summary != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => JobSeekerSummary(summary: summary),
+                    ),
+                  );
+                }
               },
             ),
 
@@ -84,8 +96,12 @@ class JobSeekerProfile extends StatelessWidget {
               leading: const Icon(Icons.work),
               title: const Text('Applied Jobs'),
               onTap: () {
-                // TODO: Navigate to applied jobs page
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyApplicationsPage(),
+                  ),
+                );
               },
             ),
 
@@ -99,7 +115,6 @@ class JobSeekerProfile extends StatelessWidget {
             ),
 
             const Divider(), // Thin line separator
-
             // 🔴 Logout Option
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
@@ -123,7 +138,7 @@ class JobSeekerProfile extends StatelessWidget {
       // BODY: Main content area
       // ----------------------------
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -148,8 +163,8 @@ class JobSeekerProfile extends StatelessWidget {
                 backgroundColor: Colors.grey[200],
                 backgroundImage: (photoUrl != null)
                     ? NetworkImage(photoUrl) // From backend
-                    : const AssetImage('assets/default_avatar.png')
-                as ImageProvider, // Local default image
+                    : const AssetImage('assets/images/default_avatar.jpg')
+                          as ImageProvider, // Local default image
               ),
             ),
 
@@ -190,8 +205,10 @@ class JobSeekerProfile extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 foregroundColor: Colors.white,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
