@@ -1,3 +1,6 @@
+
+
+
 class Education {
   int? id;
   String? level;
@@ -6,31 +9,28 @@ class Education {
   String? result;
   String? year;
 
-  Education(
-      {this.id,
-        this.level,
-        this.institute,
-        this.board,
-        this.result,
-        this.year});
+  Education({this.id, this.level, this.institute, this.board, this.result, this.year});
 
-  Education.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    level = json['level'];
-    institute = json['institute'];
-    board = json['board'];
-    result = json['result'];
-    year = json['year'];
+  factory Education.fromJson(Map<String, dynamic> json) {
+    return Education(
+      id: json['id'],
+      level: json['level'],
+      institute: json['institute'],
+      board: json['board'],
+      result: json['result'],
+      year: json['year'],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['level'] = this.level;
-    data['institute'] = this.institute;
-    data['board'] = this.board;
-    data['result'] = this.result;
-    data['year'] = this.year;
-    return data;
+    return {
+      'id': id,
+      'level': level,
+      'institute': institute,
+      'board': board,
+      'result': result,
+      'year': year,
+      // Do NOT include jobSeeker
+    };
   }
 }

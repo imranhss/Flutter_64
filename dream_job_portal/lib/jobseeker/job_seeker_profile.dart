@@ -1,3 +1,4 @@
+import 'package:code/jobseeker/education_page.dart';
 import 'package:code/jobseeker/my_Applications_Page.dart';
 import 'package:code/jobseeker/summary_page.dart';
 import 'package:code/service/summary_service.dart';
@@ -100,6 +101,19 @@ class JobSeekerProfile extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => MyApplicationsPage(),
+                  ),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.book),
+              title: const Text('Education'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EducationListScreen(),
                   ),
                 );
               },
